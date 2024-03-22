@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EV Details</title>
+</head>
+<body>
+    <h2>EV Details</h2>
+    {% if ev_data %}
+    <form action="/ev/{{ ev_data.name }}/edit" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ ev_data.name }}"><br><br>
+
+        <label for="manufacturer">Manufacturer:</label>
+        <input type="text" id="manufacturer" name="manufacturer" value="{{ ev_data.manufacturer }}"><br><br>
+
+        <label for="year">Year:</label>
+        <input type="number" id="year" name="year" value="{{ ev_data.year }}"><br><br>
+
+        <label for="battery_size">Battery Size (Kwh):</label>
+        <input type="number" id="battery_size" name="battery_size" value="{{ ev_data.battery_size }}"><br><br>
+
+        <label for="wltp_range">WLTP Range (Km):</label>
+        <input type="number" id="wltp_range" name="wltp_range" value="{{ ev_data.wltp_range }}"><br><br>
+
+        <label for="cost">Cost:</label>
+        <input type="number" id="cost" name="cost" value="{{ ev_data.cost }}"><br><br>
+
+        <label for="power_kw">Power (Kw):</label>
+        <input type="number" id="power_kw" name="power_kw" value="{{ ev_data.power_kw }}"><br><br>
+
+        <button type="submit">Save</button>
+    </form><br/>
+    <form action="/insert-ev-meta/{{ ev_data.name }}" method="post">
+        <label for="review">Review:</label><br>
+        <textarea id="review" name="review" rows="4" cols="50"></textarea><br><br>
+
+        <label for="rating">Rating (1-10):</label><br>
+        <input type="number" id="rating" name="rating" min="1" max="10"><br><br>
+
+        <button type="submit">Submit Review</button>
+    </form>
+    <h3>Reviews:</h3>
+        <ul id="reviewsList">
+            <!-- Reviews will be displayed here dynamically -->
+        </ul>
+    <script>
+        // Function to fetch EV meta data
+        async function getEVMeta(ev_name) {
+            const response = await fetch(`/get-ev-meta/${ev_name}`);
+            const data = await response.json();
+            return data;
+        }
+
+        // Function to display reviews
+        async function displayReviews(ev_name) {
+            const evMeta = await getEVMeta(ev_name);
+            const reviewsList = document.getElementById('reviewsList');
+
+            // Clear previous reviews
+            reviewsList.innerHTML = '';
+
+            // Check if reviews exist
+            if (evMeta.length > 0) {
+                evMeta.forEach(review => {
+                    const li = document.createElement('li');
+                    li.textContent = `${review.review} - Rating: ${review.rating}`;
+                    reviewsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'No reviews available.';
+                reviewsList.appendChild(li);
+            }
+        }
+
+        // Call displayReviews function when the page loads
+        window.addEventListener('load', () => {
+            const evName = '{{ ev_data.name }}'; // Get the EV name from the template
+            displayReviews(evName);
+        });
+    </script>
+    {% else %}
+    <p>No EV data found.</p>
+    {% endif %}
+</body>
+</html>

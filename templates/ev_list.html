@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EV List</title>
+    <script>
+        function deleteEv(evId) {
+            fetch(`/delete-ev/${evId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the page after successful deletion
+                    window.location.reload();
+                } else {
+                    console.error('Failed to delete EV');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting EV:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Electric Vehicles</h1>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Manufacturer</th>
+            <th>Year</th>
+            <th>Battery Size (Kwh)</th>
+            <th>WLTP Range (Km)</th>
+            <th>Cost</th>
+            <th>Power (Kw)</th>
+            <th>Action</th> <!-- Added column for delete button -->
+        </tr>
+
+        {{evs}}
+        {% for ev in evs %}
+        <tr>
+            <td>{{ ev.name }}</td>
+            <td>{{ ev.manufacturer }}</td>
+            <td>{{ ev.year }}</td>
+            <td>{{ ev.battery_size }}</td>
+            <td>{{ ev.wltp_range }}</td>
+            <td>{{ ev.cost }}</td>
+            <td>{{ ev.power_kw }}</td>
+            <td>
+                <!-- Add delete button with onclick event calling deleteEv function -->
+                <button onclick="deleteEv('{{ ev.id }}')">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
