@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Query Results</title>
+</head>
+<body>
+    <h2>Query Results</h2>
+    {% if evs %}
+        <ul>
+            {% for ev in evs %}
+                <li>
+                    <a href="/ev/{{ ev.name }}">{{ ev.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>
+
