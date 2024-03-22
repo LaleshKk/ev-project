@@ -1,0 +1,109 @@
+<html>
+<head>
+    <title>Select EV</title>
+</head>
+<body>
+    <h1>Select Electric Vehicles</h1>
+    <div>
+        <label for="ev1">Select EV 1:</label>
+        <select id="ev1" onchange="displayEVInfo('ev1')">
+            <option>Select</option>
+            <!-- Options for EV 1 dropdown will be populated dynamically using JavaScript -->
+        </select>
+    </div>
+    <div>
+        <label for="ev2">Select EV 2:</label>
+        <select id="ev2" onchange="displayEVInfo('ev2')">
+            <option>Select</option>
+            <!-- Options for EV 2 dropdown will be populated dynamically using JavaScript -->
+        </select>
+    </div>
+    <div id="ev1Info">
+        <!-- Information of selected EV 1 will be displayed here -->
+    </div>
+    <div id="ev2Info">
+        <!-- Information of selected EV 2 will be displayed here -->
+    </div>
+    
+    <script>
+        // Function to fetch EVs from the server
+    async function fetchEVs() {
+        const response = await fetch('/select-evs');
+        const data = await response.json();
+        return data.evs; // Access the "evs" key of the JSON response
+    }
+    
+    // Function to populate dropdown menus with EV data
+    async function populateDropdowns() {
+        const evs = await fetchEVs();
+        const ev1Dropdown = document.getElementById('ev1');
+        const ev2Dropdown = document.getElementById('ev2');
+
+        evs.forEach(ev => {
+            const option1 = document.createElement('option');
+            option1.value = ev.id;
+            option1.textContent = ev.name; // Populate dropdown with EV name
+            ev1Dropdown.appendChild(option1);
+
+            const option2 = document.createElement('option');
+            option2.value = ev.id;
+            option2.textContent = ev.name; // Populate dropdown with EV name
+            ev2Dropdown.appendChild(option2);
+        });
+    }
+
+    // Function to display EV information
+    async function displayEVInfo(dropdownId) {
+        const selectedId = document.getElementById(dropdownId).value;
+        const evs = await fetchEVs();
+        const selectedEV = evs.find(ev => ev.id === selectedId);
+        const infoDiv = document.getElementById(`${dropdownId}Info`);
+
+        // Check if the selected EV is found
+        if (selectedEV) {
+            // Define properties
+            const properties = {
+                "ID": selectedEV.id,
+                "Name": `<a href="/ev/${selectedEV.name}">${selectedEV.name}</a>`,
+                "Manufacturer": selectedEV.manufacturer,
+                "Year": selectedEV.year,
+                "Battery Size": selectedEV.battery_size,
+                "WLTP Range": selectedEV.wltp_range,
+                "Cost": selectedEV.cost,
+                "Power kW": selectedEV.power_kw
+            };
+
+            // Initialize HTML string
+            let html = '';
+
+            // Loop through properties
+            for (const [key, value] of Object.entries(properties)) {
+                // Check if the value is numeric
+                if (!isNaN(value)) {
+                    // Check if the value is the maximum or minimum
+                    if (value === Math.max(...Object.values(properties).filter(val => !isNaN(val)))) {
+                        html += `<p>${key}: <span style="color: green;">${value}</span></p>`;
+                    } else if (value === Math.min(...Object.values(properties).filter(val => !isNaN(val)))) {
+                        html += `<p>${key}: <span style="color: red;">${value}</span></p>`;
+                    } else {
+                        html += `<p>${key}: ${value}</p>`;
+                    }
+                } else {
+                    html += `<p>${key}: ${value}</p>`;
+                }
+            }
+
+            // Update infoDiv with HTML
+            infoDiv.innerHTML = html;
+        } else {
+            infoDiv.innerHTML = "<p>No information available for the selected EV.</p>";
+        }
+    }
+    
+    // Populate dropdown menus with EV data when the page loads
+    window.addEventListener('load', () => {
+        populateDropdowns();
+    });
+    </script>
+</body>
+</html>
